@@ -305,7 +305,7 @@ export const useBoardStore = create<BoardState>()(
       },
     }),
     {
-      name: 'skolesiden-board',
+      name: 'klassetavle-board',
 
       // Only persist what's needed — canvases array is the source of truth
       partialize: (s) => ({

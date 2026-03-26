@@ -1,4 +1,4 @@
-# Skolesiden — Deploy-guide
+# KlasseTavle — Deploy-guide
 
 ## Rask lokal start (uten backend)
 
@@ -15,7 +15,7 @@ npm run dev
 
 ### Steg 1 — Opprett Supabase-prosjekt
 1. Gå til [supabase.com](https://supabase.com) og klikk **New project**
-2. Velg et navn (f.eks. `skolesiden`) og en region nær Norge (f.eks. `West EU`)
+2. Velg et navn (f.eks. `klassetavle`) og en region nær Norge (f.eks. `West EU`)
 3. Vent til prosjektet er klart
 
 ### Steg 2 — Opprett databasetabell
@@ -95,32 +95,31 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### Steg 1 — Push til GitHub
 ```bash
-git init
-git add .
-git commit -m "Initial commit: Skolesiden"
-git remote add origin https://github.com/DITT-BRUKERNAVN/skolesiden.git
+git remote add origin https://github.com/BlastBlastBlast/klassetavle.git
 git push -u origin main
 ```
 
 ### Steg 2 — Koble til Vercel
 1. Gå til [vercel.com](https://vercel.com) → **Add New Project**
-2. Velg GitHub-repositoriet
+2. Velg GitHub-repositoriet `klassetavle`
 3. Under **Environment Variables**, legg til:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
 4. Klikk **Deploy**
 
-### Steg 3 — Eget domene (f.eks. skolesiden.no)
-1. Vercel-dashboardet: **Settings → Domains** → skriv inn domenet
-2. Hos domeneregistraren din, legg til:
+### Steg 3 — Eget domene (klassetavle.no)
+1. Kjøp domenet på [domeneshop.no](https://domeneshop.no)
+2. Vercel-dashboardet: **Settings → Domains** → skriv inn `klassetavle.no`
+3. Hos Domeneshop, gå til **DNS** og legg til:
    - `A`-record: `@` → `76.76.21.21`
    - `CNAME`-record: `www` → `cname.vercel-dns.com`
+4. Vent 5–30 min på DNS-propagering
 
 ### Steg 4 — Oppdater Supabase redirect URL
 Gå til **Authentication → URL Configuration** og legg til:
 ```
-https://dittdomene.no
-https://dittdomene.no/**
+https://klassetavle.no
+https://klassetavle.no/**
 ```
 
 ---
