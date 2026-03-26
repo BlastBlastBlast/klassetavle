@@ -26,13 +26,40 @@ export interface Widget {
   data: Record<string, unknown>
 }
 
+export interface Canvas {
+  id: string
+  name: string
+  widgets: Widget[]
+  background: string
+  maxZ: number
+}
+
+const DEFAULT_BG = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+
+/** Snapshot the live canvas state back into the canvases array */
+const syncCanvas = (
+  canvases: Canvas[],
+  index: number,
+  widgets: Widget[],
+  background: string,
+  maxZ: number,
+): Canvas[] =>
+  canvases.map((c, i) => (i === index ? { ...c, widgets, background, maxZ } : c))
+
 interface BoardState {
-  // Canvas state
+  // ── Live canvas state (current canvas) ──────────────────────────
   widgets: Widget[]
   background: string
   maxZ: number
 
-  // Persistence state
+  // ── Multi-canvas ─────────────────────────────────────────────────
+  canvases: Canvas[]
+  currentCanvasIndex: number
+
+  // ── Gesture overlay ───────────────────────────────────────────────
+  globalGestureId: string | null
+
+  // ── Supabase persistence ──────────────────────────────────────────
   currentBoardId: string | null
   currentBoardName: string
   savedBoards: Omit<BoardRow, 'data'>[]
@@ -40,7 +67,7 @@ interface BoardState {
   lastSaved: string | null
   hasUnsavedChanges: boolean
 
-  // Canvas actions
+  // ── Canvas actions ────────────────────────────────────────────────
   addWidget: (type: WidgetType, defaults?: Partial<Widget>) => void
   removeWidget: (id: string) => void
   updateWidget: (id: string, updates: Partial<Widget>) => void
@@ -49,7 +76,16 @@ interface BoardState {
   setBackground: (bg: string) => void
   clearBoard: () => void
 
-  // Supabase actions
+  // ── Multi-canvas actions ──────────────────────────────────────────
+  addCanvas: () => void
+  switchCanvas: (index: number) => void
+  renameCanvas: (index: number, name: string) => void
+  deleteCanvas: (index: number) => void
+
+  // ── Gesture action ────────────────────────────────────────────────
+  setGlobalGesture: (id: string | null) => void
+
+  // ── Supabase actions ──────────────────────────────────────────────
   setBoardName: (name: string) => void
   syncSave: () => Promise<void>
   syncLoad: (id: string) => Promise<void>
@@ -68,15 +104,18 @@ const DEFAULT_SIZES: Record<WidgetType, { width: number; height: number }> = {
   snurrehjul: { width: 380, height: 420 },
   tegning:    { width: 500, height: 400 },
   bakgrunn:   { width: 320, height: 420 },
-  gestu:      { width: 340, height: 280 },
+  gestu:      { width: 340, height: 300 },
 }
 
 export const useBoardStore = create<BoardState>()(
   persist(
     (set, get) => ({
       widgets: [],
-      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+      background: DEFAULT_BG,
       maxZ: 1,
+      canvases: [{ id: 'canvas-1', name: 'Tavle 1', widgets: [], background: DEFAULT_BG, maxZ: 1 }],
+      currentCanvasIndex: 0,
+      globalGestureId: null,
       currentBoardId: null,
       currentBoardName: 'Min tavle',
       savedBoards: [],
@@ -84,6 +123,7 @@ export const useBoardStore = create<BoardState>()(
       lastSaved: null,
       hasUnsavedChanges: false,
 
+      // ── Canvas actions ──────────────────────────────────────────
       addWidget: (type, defaults = {}) => {
         const { widgets, maxZ } = get()
         const size = DEFAULT_SIZES[type]
@@ -130,6 +170,84 @@ export const useBoardStore = create<BoardState>()(
 
       clearBoard: () => set({ widgets: [], maxZ: 1, hasUnsavedChanges: true }),
 
+      // ── Multi-canvas actions ────────────────────────────────────
+      addCanvas: () => {
+        const { widgets, background, maxZ, canvases, currentCanvasIndex } = get()
+        const saved = syncCanvas(canvases, currentCanvasIndex, widgets, background, maxZ)
+        const newCanvas: Canvas = {
+          id: `canvas-${Date.now()}`,
+          name: `Tavle ${saved.length + 1}`,
+          widgets: [],
+          background: DEFAULT_BG,
+          maxZ: 1,
+        }
+        set({
+          canvases: [...saved, newCanvas],
+          currentCanvasIndex: saved.length,
+          widgets: [],
+          background: DEFAULT_BG,
+          maxZ: 1,
+          hasUnsavedChanges: true,
+        })
+      },
+
+      switchCanvas: (index) => {
+        const { widgets, background, maxZ, canvases, currentCanvasIndex } = get()
+        if (index === currentCanvasIndex || index < 0 || index >= canvases.length) return
+        const saved = syncCanvas(canvases, currentCanvasIndex, widgets, background, maxZ)
+        const target = saved[index]
+        set({
+          canvases: saved,
+          currentCanvasIndex: index,
+          widgets: target.widgets,
+          background: target.background,
+          maxZ: target.maxZ,
+          hasUnsavedChanges: true,
+        })
+      },
+
+      renameCanvas: (index, name) =>
+        set((s) => ({
+          canvases: s.canvases.map((c, i) => (i === index ? { ...c, name } : c)),
+          hasUnsavedChanges: true,
+        })),
+
+      deleteCanvas: (index) => {
+        const { canvases, currentCanvasIndex, widgets, background, maxZ } = get()
+        if (canvases.length <= 1) return
+
+        // Snapshot current canvas unless it's the one being deleted
+        const base =
+          index === currentCanvasIndex
+            ? canvases
+            : syncCanvas(canvases, currentCanvasIndex, widgets, background, maxZ)
+
+        const newCanvases = base.filter((_, i) => i !== index)
+
+        // Decide which canvas to land on
+        let newIndex = currentCanvasIndex
+        if (index === currentCanvasIndex) {
+          newIndex = Math.max(0, index - 1)
+        } else if (index < currentCanvasIndex) {
+          newIndex = currentCanvasIndex - 1
+        }
+        newIndex = Math.min(newIndex, newCanvases.length - 1)
+
+        const target = newCanvases[newIndex]
+        set({
+          canvases: newCanvases,
+          currentCanvasIndex: newIndex,
+          widgets: target.widgets,
+          background: target.background,
+          maxZ: target.maxZ,
+          hasUnsavedChanges: true,
+        })
+      },
+
+      // ── Gesture ────────────────────────────────────────────────
+      setGlobalGesture: (id) => set({ globalGestureId: id }),
+
+      // ── Supabase actions ────────────────────────────────────────
       setBoardName: (name) => set({ currentBoardName: name, hasUnsavedChanges: true }),
 
       loadBoardData: (data) =>
@@ -146,7 +264,6 @@ export const useBoardStore = create<BoardState>()(
             hasUnsavedChanges: false,
             lastSaved: new Date().toISOString(),
           })
-          // Refresh the list
           get().syncListBoards()
         } else {
           set({ syncing: false })
@@ -160,7 +277,7 @@ export const useBoardStore = create<BoardState>()(
           const data = row.data as { widgets: Widget[]; background: string; maxZ: number }
           set({
             widgets: data.widgets ?? [],
-            background: data.background ?? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            background: data.background ?? DEFAULT_BG,
             maxZ: data.maxZ ?? 1,
             currentBoardId: row.id,
             currentBoardName: row.name,
@@ -189,14 +306,59 @@ export const useBoardStore = create<BoardState>()(
     }),
     {
       name: 'skolesiden-board',
-      // Don't persist transient UI state
+
+      // Only persist what's needed — canvases array is the source of truth
       partialize: (s) => ({
+        canvases: syncCanvas(s.canvases, s.currentCanvasIndex, s.widgets, s.background, s.maxZ),
+        currentCanvasIndex: s.currentCanvasIndex,
+        globalGestureId: s.globalGestureId,
+        // Legacy fields kept for Supabase sync compat
         widgets: s.widgets,
         background: s.background,
         maxZ: s.maxZ,
         currentBoardId: s.currentBoardId,
         currentBoardName: s.currentBoardName,
       }),
+
+      // Migrate old localStorage (no canvases) and ensure live state matches active canvas
+      merge: (persisted, current) => {
+        const p = persisted as Partial<BoardState>
+
+        // ── Old version: no canvases field → wrap legacy widgets into canvas 1 ──
+        if (!p.canvases || p.canvases.length === 0) {
+          const legacy: Canvas = {
+            id: 'canvas-1',
+            name: 'Tavle 1',
+            widgets: (p.widgets ?? []) as Widget[],
+            background: (p.background as string | undefined) ?? current.background,
+            maxZ: (p.maxZ as number | undefined) ?? 1,
+          }
+          return {
+            ...current,
+            ...p,
+            canvases: [legacy],
+            currentCanvasIndex: 0,
+            widgets: legacy.widgets,
+            background: legacy.background,
+            maxZ: legacy.maxZ,
+          } as BoardState
+        }
+
+        // ── Normal load: hydrate live state from active canvas ──
+        const idx = Math.min(
+          (p.currentCanvasIndex ?? 0),
+          p.canvases.length - 1,
+        )
+        const active = p.canvases[idx]
+        return {
+          ...current,
+          ...p,
+          currentCanvasIndex: idx,
+          widgets: active.widgets,
+          background: active.background,
+          maxZ: active.maxZ,
+        } as BoardState
+      },
     }
   )
 )

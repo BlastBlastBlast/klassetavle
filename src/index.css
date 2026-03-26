@@ -26,6 +26,11 @@
   border-radius: 50%;
   z-index: 10;
   border: 2px solid rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.widget-container:hover .react-resizable-handle {
+  opacity: 1;
 }
 .react-resizable-handle-se { bottom: -7px; right: -7px; cursor: se-resize; }
 .react-resizable-handle-sw { bottom: -7px; left: -7px; cursor: sw-resize; }
@@ -90,3 +95,15 @@
 .animate-timer-done { animation: timer-done 0.5s ease-in-out infinite; }
 .animate-float-in { animation: float-in 0.2s ease-out forwards; }
 .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards; }
+
+/* ── Canvas switch slide ────────────────────────────────────────── */
+@keyframes canvas-slide-in-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes canvas-slide-in-left {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-canvas-in-right { animation: canvas-slide-in-right 0.25s ease-out forwards; }
+.animate-canvas-in-left  { animation: canvas-slide-in-left  0.25s ease-out forwards; }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   TrafficCone, Type, Image, Clock, Dices, Timer as TimerIcon,
   Circle, Pencil, Palette, Hand, Trash2, ChevronLeft, ChevronRight
@@ -20,9 +20,23 @@ const TOOLS: { type: WidgetType; icon: React.ReactNode; label: string; emoji: st
 ]
 
 export function Toolbar() {
-  const { addWidget, clearBoard } = useBoardStore()
+  const { addWidget, clearBoard, widgets, background } = useBoardStore()
   const [collapsed, setCollapsed] = useState(false)
   const [showConfirmClear, setShowConfirmClear] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [justSaved, setJustSaved] = useState(false)
+
+  // Auto-save indicator: Zustand persist writes to localStorage on every change.
+  // We debounce 600ms so the "✓ Lagret" badge appears shortly after each edit.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLastSaved(new Date())
+      setJustSaved(true)
+      const fadeTimer = setTimeout(() => setJustSaved(false), 2000)
+      return () => clearTimeout(fadeTimer)
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [widgets, background])
 
   return (
     <div
@@ -94,6 +108,22 @@ export function Toolbar() {
               <span className="text-white/30 text-[10px] group-hover:text-red-400/80">Tøm</span>
             </button>
           )}
+
+          {/* Auto-save status */}
+          <div className="h-px bg-white/10 my-1" />
+          <div className="flex flex-col items-center gap-0.5 px-1 pb-1 min-h-[28px] justify-center">
+            {justSaved ? (
+              <span className="text-green-400 text-[9px] font-medium tracking-wide animate-pulse">
+                ✓ Lagret
+              </span>
+            ) : lastSaved ? (
+              <span className="text-white/20 text-[9px] text-center leading-tight">
+                💾 {lastSaved.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            ) : (
+              <span className="text-white/15 text-[9px]">lokalt</span>
+            )}
+          </div>
         </div>
 
         {/* Collapse toggle tab */}

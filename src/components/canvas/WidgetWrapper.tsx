@@ -60,7 +60,7 @@ export function WidgetWrapper({ widget, children, minWidth = 120, minHeight = 80
         top: widget.y,
         zIndex: widget.zIndex,
       }}
-      className="animate-float-in"
+      className="animate-float-in widget-container"
     >
       <ResizableBox
         width={widget.width}
