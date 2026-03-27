@@ -54,8 +54,13 @@ export function AuthBar() {
   if (!supabase) return null
   if (!initialized) return null
 
+  // Logged-out: small button in bottom-right corner
+  const position = user
+    ? 'fixed top-3 right-3 z-[9999] flex items-center gap-2'
+    : 'fixed bottom-3 right-3 z-[9999] flex items-center gap-2'
+
   return (
-    <div className="fixed top-3 right-3 z-[9999] flex items-center gap-2" style={{ pointerEvents: 'auto' }}>
+    <div className={position} style={{ pointerEvents: 'auto' }}>
 
       {user ? (
         <>

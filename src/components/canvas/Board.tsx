@@ -5,6 +5,8 @@ import { WidgetRenderer } from './WidgetRenderer'
 import { GestureAmbient } from './GestureAmbient'
 import { GestureOverlay } from './GestureOverlay'
 import { CanvasNavigator } from './CanvasNavigator'
+import { Timeline } from '../timeline/Timeline'
+import { TimelineControls } from '../timeline/TimelineControls'
 
 export function Board() {
   const { widgets, background } = useBoardStore()
@@ -29,6 +31,10 @@ export function Board() {
       <Toolbar />
       <AuthBar />
       <CanvasNavigator />
+
+      {/* ⑤ Timeline — full-width top bar + detached controls pill */}
+      <Timeline />
+      <TimelineControls />
     </div>
   )
 }
