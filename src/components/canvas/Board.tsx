@@ -11,11 +11,20 @@ import { TimelineControls } from '../timeline/TimelineControls'
 export function Board() {
   const { widgets, background } = useBoardStore()
 
+  // When the user hasn't set a custom background, fall back to the themed canvas colour
+  const effectiveBg = background === '#FFF8ED' ? 'var(--canvas-bg)' : background
+
   return (
     <div
       className="relative w-full h-full overflow-hidden select-none"
-      style={{ background }}
+      style={{ background: effectiveBg }}
     >
+      {/* Dot-grid paper texture — always present, very subtle */}
+      <div
+        className="absolute inset-0 pointer-events-none canvas-grid"
+        style={{ opacity: 0.45, zIndex: 0 }}
+      />
+
       {/* ① Gesture ambient — behind all widgets (z-index: 1) */}
       <GestureAmbient />
 

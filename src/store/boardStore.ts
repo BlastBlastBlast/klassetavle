@@ -34,7 +34,7 @@ export interface Canvas {
   maxZ: number
 }
 
-const DEFAULT_BG = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
+const DEFAULT_BG = '#FFF8ED'
 
 /** Snapshot the live canvas state back into the canvases array */
 const syncCanvas = (

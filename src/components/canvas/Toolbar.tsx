@@ -1,41 +1,45 @@
 import React, { useState, useEffect } from 'react'
-import {
-  TrafficCone, Type, Image, Clock, Dices, Timer as TimerIcon,
-  Circle, Pencil, Palette, Hand, Trash2, ChevronLeft, ChevronRight
-} from 'lucide-react'
+import { Trash2, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
+import { useThemeStore } from '../../store/themeStore'
 import type { WidgetType } from '../../store/boardStore'
 
-const TOOLS: { type: WidgetType; icon: React.ReactNode; label: string; emoji: string }[] = [
-  { type: 'trafikklys', icon: <TrafficCone size={22} />, label: 'Trafikklys', emoji: '🚦' },
-  { type: 'tekst', icon: <Type size={22} />, label: 'Tekst', emoji: '✏️' },
-  { type: 'bilde', icon: <Image size={22} />, label: 'Bilde', emoji: '🖼️' },
-  { type: 'klokke', icon: <Clock size={22} />, label: 'Klokke', emoji: '🕐' },
-  { type: 'terning', icon: <Dices size={22} />, label: 'Terning', emoji: '🎲' },
-  { type: 'timer', icon: <TimerIcon size={22} />, label: 'Timer', emoji: '⏱️' },
-  { type: 'snurrehjul', icon: <Circle size={22} />, label: 'Snurrehjul', emoji: '🎡' },
-  { type: 'tegning', icon: <Pencil size={22} />, label: 'Tegning', emoji: '🎨' },
-  { type: 'bakgrunn', icon: <Palette size={22} />, label: 'Bakgrunn', emoji: '🖼' },
-  { type: 'gestu', icon: <Hand size={22} />, label: 'Gestus', emoji: '👋' },
+const TOOLS: {
+  type: WidgetType
+  emoji: string
+  label: string
+  bgLight: string
+  bgDark: string
+  border: string
+}[] = [
+  { type: 'trafikklys', emoji: '🚦', label: 'Trafikklys', bgLight: '#FFF3BF', bgDark: '#3A320F', border: '#FFD43B' },
+  { type: 'tekst',      emoji: '✏️', label: 'Tekst',      bgLight: '#E7F5FF', bgDark: '#0D2137', border: '#74C0FC' },
+  { type: 'bilde',      emoji: '🖼️', label: 'Bilde',      bgLight: '#FFF0F6', bgDark: '#37102A', border: '#F783AC' },
+  { type: 'klokke',     emoji: '🕐', label: 'Klokke',     bgLight: '#F3F0FF', bgDark: '#21183D', border: '#9775FA' },
+  { type: 'terning',    emoji: '🎲', label: 'Terning',    bgLight: '#E6FCF5', bgDark: '#0A2E24', border: '#20C997' },
+  { type: 'timer',      emoji: '⏱️', label: 'Timer',      bgLight: '#FFF4E6', bgDark: '#3A1F07', border: '#FF922B' },
+  { type: 'snurrehjul', emoji: '🎡', label: 'Snurrehjul', bgLight: '#F0FFF4', bgDark: '#0E2E16', border: '#51CF66' },
+  { type: 'tegning',    emoji: '🎨', label: 'Tegning',    bgLight: '#FFF0F6', bgDark: '#30103A', border: '#CC5DE8' },
+  { type: 'bakgrunn',   emoji: '🖼',  label: 'Bakgrunn',   bgLight: '#E7F5FF', bgDark: '#0D2137', border: '#339AF0' },
+  { type: 'gestu',      emoji: '👋', label: 'Gestus',     bgLight: '#FFF9DB', bgDark: '#332B07', border: '#FAB005' },
 ]
 
 export function Toolbar() {
   const { addWidget, clearBoard, widgets, background } = useBoardStore()
+  const { theme, toggle: toggleTheme } = useThemeStore()
+  const isDark = theme === 'dark'
+
   const [collapsed, setCollapsed] = useState(false)
   const [showConfirmClear, setShowConfirmClear] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [justSaved, setJustSaved] = useState(false)
 
-  // Auto-save indicator: Zustand persist writes to localStorage on every change.
-  // We debounce 600ms so the "✓ Lagret" badge appears shortly after each edit.
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLastSaved(new Date())
+    const t = setTimeout(() => {
       setJustSaved(true)
-      const fadeTimer = setTimeout(() => setJustSaved(false), 2000)
-      return () => clearTimeout(fadeTimer)
+      const f = setTimeout(() => setJustSaved(false), 2000)
+      return () => clearTimeout(f)
     }, 600)
-    return () => clearTimeout(timer)
+    return () => clearTimeout(t)
   }, [widgets, background])
 
   return (
@@ -43,57 +47,77 @@ export function Toolbar() {
       className="fixed left-0 top-0 h-full z-[9999] flex items-center"
       style={{ pointerEvents: 'none' }}
     >
-      <div
-        className="relative flex flex-col items-center"
-        style={{ pointerEvents: 'auto' }}
-      >
-        {/* Main toolbar panel */}
+      <div className="relative flex flex-col items-center" style={{ pointerEvents: 'auto' }}>
+
+        {/* ── Main panel ──────────────────────────────────────────────────── */}
         <div
-          className={`flex flex-col gap-1 py-3 px-2 rounded-r-2xl transition-all duration-300 ${
-            collapsed ? 'translate-x-[-100%] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'
+          className={`flex flex-col gap-1.5 py-3 px-2 transition-all duration-300 ${
+            collapsed ? 'translate-x-[-110%] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'
           }`}
           style={{
-            background: 'rgba(15,15,30,0.92)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '4px 0 24px rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--panel-bg)',
+            border: '2.5px solid var(--panel-border)',
             borderLeft: 'none',
-            minWidth: '68px',
+            borderRadius: '0 20px 20px 0',
+            boxShadow: 'var(--shadow-md)',
+            minWidth: '72px',
           }}
         >
-          <div className="text-center mb-1">
-            <span className="text-white/40 text-xs font-bold tracking-widest">SKOLE</span>
+          {/* Logo label */}
+          <div className="text-center mb-1 px-1">
+            <span className="text-xs font-black tracking-wide" style={{ color: '#7C3AED' }}>
+              🏫 SKOLE
+            </span>
           </div>
 
+          {/* Tool buttons */}
           {TOOLS.map((tool) => (
             <button
               key={tool.type}
               onClick={() => addWidget(tool.type)}
               title={tool.label}
-              className="group flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl hover:bg-white/10 active:bg-white/20 transition-all duration-150"
+              className="group flex flex-col items-center gap-0.5 px-2 py-2 rounded-2xl transition-all duration-150 active:scale-95"
+              style={{
+                background: isDark ? tool.bgDark : tool.bgLight,
+                border: `2px solid ${tool.border}`,
+                boxShadow: 'var(--shadow-sm)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translate(-1px, -1px)'
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = ''
+                e.currentTarget.style.boxShadow = 'var(--shadow-sm)'
+              }}
             >
               <span className="text-xl leading-none">{tool.emoji}</span>
-              <span className="text-white/50 text-[10px] group-hover:text-white/80 transition-colors">
+              <span className="text-[9px] font-bold leading-none" style={{ color: tool.border }}>
                 {tool.label}
               </span>
             </button>
           ))}
 
-          <div className="h-px bg-white/10 my-1" />
+          {/* Divider */}
+          <div className="h-0.5 rounded-full mx-1 my-0.5" style={{ background: 'var(--panel-border)' }} />
 
           {/* Clear board */}
           {showConfirmClear ? (
-            <div className="flex flex-col gap-1 px-1">
-              <span className="text-white/60 text-[10px] text-center">Sikker?</span>
+            <div className="flex flex-col gap-1 px-1 py-1">
+              <span className="text-[10px] font-bold text-center" style={{ color: 'var(--ink-soft)' }}>
+                Sikker?
+              </span>
               <button
                 onClick={() => { clearBoard(); setShowConfirmClear(false) }}
-                className="text-red-400 text-xs hover:text-red-300 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
+                className="text-xs font-bold px-2 py-1 rounded-xl transition-colors"
+                style={{ background: '#FFF0F0', color: '#F03E3E', border: '2px solid #F03E3E' }}
               >
                 Ja
               </button>
               <button
                 onClick={() => setShowConfirmClear(false)}
-                className="text-white/50 text-xs hover:text-white/80 transition-colors px-2 py-1 rounded-lg hover:bg-white/10"
+                className="text-xs font-bold px-2 py-1 rounded-xl"
+                style={{ background: 'var(--panel-bg-alt)', color: 'var(--ink-soft)', border: '2px solid var(--panel-border)' }}
               >
                 Nei
               </button>
@@ -102,46 +126,84 @@ export function Toolbar() {
             <button
               onClick={() => setShowConfirmClear(true)}
               title="Tøm tavlen"
-              className="group flex flex-col items-center gap-0.5 px-2 py-2 rounded-xl hover:bg-red-500/20 transition-all"
+              className="group flex flex-col items-center gap-0.5 px-2 py-2 rounded-2xl transition-all"
+              style={{ background: isDark ? '#2A1515' : '#FFF5F5', border: '2px solid #FFB8B8' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#FFE3E3'
+                e.currentTarget.style.borderColor = '#F03E3E'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = isDark ? '#2A1515' : '#FFF5F5'
+                e.currentTarget.style.borderColor = '#FFB8B8'
+              }}
             >
-              <Trash2 size={18} className="text-white/40 group-hover:text-red-400 transition-colors" />
-              <span className="text-white/30 text-[10px] group-hover:text-red-400/80">Tøm</span>
+              <Trash2 size={16} style={{ color: '#F03E3E' }} />
+              <span className="text-[9px] font-bold" style={{ color: '#F03E3E' }}>Tøm</span>
             </button>
           )}
 
-          {/* Auto-save status */}
-          <div className="h-px bg-white/10 my-1" />
-          <div className="flex flex-col items-center gap-0.5 px-1 pb-1 min-h-[28px] justify-center">
+          {/* Divider */}
+          <div className="h-0.5 rounded-full mx-1" style={{ background: 'var(--panel-border)' }} />
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            title={isDark ? 'Lysmodus' : 'Mørk modus'}
+            className="flex flex-col items-center gap-0.5 px-2 py-2 rounded-2xl transition-all active:scale-95"
+            style={{
+              background: isDark ? '#2A2340' : '#FFFDE7',
+              border: `2px solid ${isDark ? '#7C3AED' : '#FAB005'}`,
+              boxShadow: 'var(--shadow-sm)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translate(-1px, -1px)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = '' }}
+          >
+            {isDark
+              ? <Sun  size={16} style={{ color: '#FAB005' }} />
+              : <Moon size={16} style={{ color: '#7C3AED' }} />
+            }
+            <span className="text-[9px] font-bold" style={{ color: isDark ? '#FAB005' : '#7C3AED' }}>
+              {isDark ? 'Lys' : 'Mørk'}
+            </span>
+          </button>
+
+          {/* Save status */}
+          <div className="flex items-center justify-center pb-1 min-h-[20px]">
             {justSaved ? (
-              <span className="text-green-400 text-[9px] font-medium tracking-wide animate-pulse">
+              <span className="text-[9px] font-bold animate-wiggle" style={{ color: '#20C997' }}>
                 ✓ Lagret
               </span>
-            ) : lastSaved ? (
-              <span className="text-white/20 text-[9px] text-center leading-tight">
-                💾 {lastSaved.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}
-              </span>
             ) : (
-              <span className="text-white/15 text-[9px]">lokalt</span>
+              <span className="text-[9px] font-bold" style={{ color: 'var(--ink-muted)' }}>
+                💾 lokalt
+              </span>
             )}
           </div>
         </div>
 
-        {/* Collapse toggle tab */}
+        {/* ── Collapse tab ────────────────────────────────────────────────── */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute right-[-28px] top-1/2 -translate-y-1/2 w-7 h-12 flex items-center justify-center rounded-r-xl transition-all hover:bg-white/10"
+          className="absolute flex items-center justify-center transition-all"
           style={{
-            background: 'rgba(15,15,30,0.92)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            right: -26,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 26,
+            height: 48,
+            background: 'var(--panel-bg)',
+            border: '2.5px solid var(--panel-border)',
             borderLeft: 'none',
+            borderRadius: '0 12px 12px 0',
+            boxShadow: 'var(--shadow-sm)',
           }}
         >
           {collapsed
-            ? <ChevronRight size={14} className="text-white/60" />
-            : <ChevronLeft size={14} className="text-white/60" />
+            ? <ChevronRight size={14} style={{ color: '#7C3AED' }} />
+            : <ChevronLeft  size={14} style={{ color: '#7C3AED' }} />
           }
         </button>
+
       </div>
     </div>
   )

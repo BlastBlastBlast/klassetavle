@@ -30,15 +30,14 @@ export function TimelineControls() {
         />
       )}
 
-      {/* Horizontal pill — top-right */}
+      {/* Horizontal pill — top-right, paper style */}
       <div
         className="fixed right-2 z-[9999] flex items-center gap-0.5 px-1.5 py-1 rounded-full select-none"
         style={{
           top: visible ? TIMELINE_BAR_HEIGHT + 6 : 6,
-          background: 'rgba(12,12,28,0.85)',
-          backdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
+          background: 'var(--panel-bg)',
+          border: '2px solid var(--panel-border)',
+          boxShadow: 'var(--shadow-sm)',
           transition: 'top 0.2s ease',
         }}
       >
@@ -46,12 +45,18 @@ export function TimelineControls() {
           onClick={zoomOut}
           disabled={zoom === ZOOM_LEVELS[0]}
           title="Zoom ut"
-          className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-25 transition-all"
+          className="w-6 h-6 flex items-center justify-center rounded-full transition-all disabled:opacity-25"
+          style={{ color: '#9DB2BC' }}
+          onMouseEnter={(e) => { if (!e.currentTarget.disabled) { e.currentTarget.style.background = '#F3F0FF'; e.currentTarget.style.color = '#7C3AED' } }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9DB2BC' }}
         >
-          <ZoomOut size={12} className="text-white/60" />
+          <ZoomOut size={12} />
         </button>
 
-        <span className="text-white/35 font-mono text-[10px] px-0.5 min-w-[22px] text-center">
+        <span
+          className="font-mono text-[10px] px-0.5 min-w-[22px] text-center font-bold"
+          style={{ color: '#9DB2BC' }}
+        >
           {zoom}×
         </span>
 
@@ -59,30 +64,39 @@ export function TimelineControls() {
           onClick={zoomIn}
           disabled={zoom === ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}
           title="Zoom inn"
-          className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-25 transition-all"
+          className="w-6 h-6 flex items-center justify-center rounded-full transition-all disabled:opacity-25"
+          style={{ color: '#9DB2BC' }}
+          onMouseEnter={(e) => { if (!e.currentTarget.disabled) { e.currentTarget.style.background = '#F3F0FF'; e.currentTarget.style.color = '#7C3AED' } }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9DB2BC' }}
         >
-          <ZoomIn size={12} className="text-white/60" />
+          <ZoomIn size={12} />
         </button>
 
-        <div className="w-px h-3 bg-white/10 mx-0.5" />
+        <div className="w-px h-3 mx-0.5" style={{ background: 'var(--panel-border)' }} />
 
         <button
           onClick={() => setShowSettings((v) => !v)}
           title="Innstillinger"
-          className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10 transition-all"
+          className="w-6 h-6 flex items-center justify-center rounded-full transition-all"
+          style={{ color: showSettings ? '#7C3AED' : '#9DB2BC', background: showSettings ? '#F3F0FF' : 'transparent' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F0FF'; e.currentTarget.style.color = '#7C3AED' }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = showSettings ? '#F3F0FF' : 'transparent'
+            e.currentTarget.style.color = showSettings ? '#7C3AED' : '#9DB2BC'
+          }}
         >
-          <Settings size={12} className={showSettings ? 'text-blue-400' : 'text-white/50'} />
+          <Settings size={12} />
         </button>
 
         <button
           onClick={toggle}
           title={visible ? 'Skjul tidslinje' : 'Vis tidslinje'}
-          className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/10 transition-all"
+          className="w-6 h-6 flex items-center justify-center rounded-full transition-all"
+          style={{ color: '#9DB2BC' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F0FF'; e.currentTarget.style.color = '#7C3AED' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9DB2BC' }}
         >
-          {visible
-            ? <EyeOff size={12} className="text-white/40" />
-            : <Eye    size={12} className="text-white/60" />
-          }
+          {visible ? <EyeOff size={12} /> : <Eye size={12} />}
         </button>
       </div>
     </>

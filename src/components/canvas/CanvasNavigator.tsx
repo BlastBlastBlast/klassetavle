@@ -12,8 +12,8 @@ export function CanvasNavigator() {
     deleteCanvas,
   } = useBoardStore()
 
-  const [editing, setEditing] = useState(false)
-  const [nameInput, setNameInput] = useState('')
+  const [editing, setEditing]           = useState(false)
+  const [nameInput, setNameInput]       = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -34,7 +34,7 @@ export function CanvasNavigator() {
   const handleDelete = () => {
     if (!confirmDelete) {
       setConfirmDelete(true)
-      setTimeout(() => setConfirmDelete(false), 3000) // auto-cancel after 3s
+      setTimeout(() => setConfirmDelete(false), 3000)
       return
     }
     deleteCanvas(currentCanvasIndex)
@@ -47,21 +47,22 @@ export function CanvasNavigator() {
     <div
       className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9997] flex items-center gap-1 px-2 py-1.5 rounded-full select-none"
       style={{
-        background: 'rgba(12,12,28,0.88)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+        background: 'var(--panel-bg)',
+        border: '2.5px solid var(--panel-border)',
+        boxShadow: 'var(--shadow-md)',
       }}
     >
       {/* ← Prev */}
       <button
         onClick={() => switchCanvas(currentCanvasIndex - 1)}
         disabled={currentCanvasIndex === 0}
-        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-25 transition-all"
+        className="w-7 h-7 flex items-center justify-center rounded-full transition-all disabled:opacity-25"
+        style={{ color: '#7C3AED' }}
+        onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.background = '#F3F0FF' }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
         title="Forrige tavle"
       >
-        <ChevronLeft size={14} className="text-white/70" />
+        <ChevronLeft size={14} />
       </button>
 
       {/* Canvas dots */}
@@ -73,11 +74,9 @@ export function CanvasNavigator() {
             title={c.name}
             className="rounded-full transition-all duration-300"
             style={{
-              width: i === currentCanvasIndex ? '18px' : '7px',
-              height: '7px',
-              background: i === currentCanvasIndex
-                ? 'rgba(255,255,255,0.9)'
-                : 'rgba(255,255,255,0.3)',
+              width: i === currentCanvasIndex ? 18 : 7,
+              height: 7,
+              background: i === currentCanvasIndex ? '#7C3AED' : '#C8B89A',
             }}
           />
         ))}
@@ -97,14 +96,22 @@ export function CanvasNavigator() {
               if (e.key === 'Escape') setEditing(false)
               e.stopPropagation()
             }}
-            className="w-full bg-white/10 text-white text-xs rounded-lg px-2 py-0.5 outline-none border border-blue-400/60 text-center"
-            style={{ minWidth: '80px' }}
+            className="w-full rounded-lg px-2 py-0.5 outline-none text-center text-xs font-bold"
+            style={{
+              minWidth: 80,
+              background: '#F3F0FF',
+              border: '2px solid #7C3AED',
+              color: 'var(--ink)',
+            }}
           />
         ) : (
           <button
             onDoubleClick={startEdit}
             title="Dobbeltklikk for å gi nytt navn"
-            className="text-white/65 text-xs hover:text-white/90 transition-colors truncate max-w-full block"
+            className="text-xs font-bold truncate max-w-full block transition-colors"
+            style={{ color: '#5D7078' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = '#7C3AED' }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = '#5D7078' }}
           >
             {current?.name}
           </button>
@@ -115,41 +122,52 @@ export function CanvasNavigator() {
       <button
         onClick={() => switchCanvas(currentCanvasIndex + 1)}
         disabled={currentCanvasIndex >= canvases.length - 1}
-        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-25 transition-all"
+        className="w-7 h-7 flex items-center justify-center rounded-full transition-all disabled:opacity-25"
+        style={{ color: '#7C3AED' }}
+        onMouseEnter={(e) => { if (!e.currentTarget.disabled) e.currentTarget.style.background = '#F3F0FF' }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
         title="Neste tavle"
       >
-        <ChevronRight size={14} className="text-white/70" />
+        <ChevronRight size={14} />
       </button>
 
       {/* Divider */}
-      <div className="w-px h-4 bg-white/10 mx-0.5" />
+      <div className="w-px h-4 mx-0.5" style={{ background: 'var(--panel-border)' }} />
 
       {/* + Add canvas */}
       <button
         onClick={addCanvas}
         title="Ny tavle"
-        className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/10 transition-all"
+        className="w-7 h-7 flex items-center justify-center rounded-full transition-all"
+        style={{ color: '#7C3AED' }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = '#F3F0FF' }}
+        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
       >
-        <Plus size={13} className="text-white/55 hover:text-white/90" />
+        <Plus size={13} />
       </button>
 
-      {/* Delete — only shown when more than one canvas */}
+      {/* Delete */}
       {canvases.length > 1 && (
         <>
-          <div className="w-px h-4 bg-white/10 mx-0.5" />
+          <div className="w-px h-4 mx-0.5" style={{ background: 'var(--panel-border)' }} />
           <button
             onClick={handleDelete}
             title={confirmDelete ? 'Klikk én gang til for å bekrefte' : 'Slett denne tavlen'}
-            className={`w-7 h-7 flex items-center justify-center rounded-full transition-all group ${
-              confirmDelete ? 'bg-red-500/30' : 'hover:bg-red-500/15'
-            }`}
+            className="w-7 h-7 flex items-center justify-center rounded-full transition-all"
+            style={{
+              background: confirmDelete ? '#FFF0F0' : 'transparent',
+              color: confirmDelete ? '#F03E3E' : '#C8B89A',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#FFF0F0'
+              e.currentTarget.style.color = '#F03E3E'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = confirmDelete ? '#FFF0F0' : 'transparent'
+              e.currentTarget.style.color = confirmDelete ? '#F03E3E' : '#C8B89A'
+            }}
           >
-            <Trash2
-              size={12}
-              className={`transition-colors ${
-                confirmDelete ? 'text-red-400' : 'text-white/25 group-hover:text-red-400'
-              }`}
-            />
+            <Trash2 size={12} />
           </button>
         </>
       )}

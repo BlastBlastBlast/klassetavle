@@ -4,19 +4,25 @@ import { WidgetWrapper } from '../canvas/WidgetWrapper'
 import { useState, useRef } from 'react'
 
 const PRESET_BACKGROUNDS = [
-  { label: 'Natt', value: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' },
-  { label: 'Solnedgang', value: 'linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #fda085 100%)' },
-  { label: 'Hav', value: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-  { label: 'Skog', value: 'linear-gradient(135deg, #134e5e 0%, #71b280 100%)' },
-  { label: 'Soloppgang', value: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)' },
-  { label: 'Is', value: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' },
-  { label: 'Varm', value: 'linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)' },
-  { label: 'Mint', value: 'linear-gradient(135deg, #0f9b58 0%, #00bf8f 100%)' },
-  { label: 'Sort', value: '#000000' },
-  { label: 'Hvit', value: '#ffffff' },
-  { label: 'Blå', value: '#1e40af' },
-  { label: 'Grønn', value: '#166534' },
+  { label: 'Papir',    value: '#FFF8ED' },
+  { label: 'Himmel',   value: 'linear-gradient(160deg, #BFE8FF 0%, #E8F7FF 100%)' },
+  { label: 'Solskinn', value: 'linear-gradient(160deg, #FFE066 0%, #FFF3BF 100%)' },
+  { label: 'Eng',      value: 'linear-gradient(160deg, #69DB7C 0%, #D3F9D8 100%)' },
+  { label: 'Solnedgang', value: 'linear-gradient(160deg, #FF8787 0%, #FFD8A8 100%)' },
+  { label: 'Hav',      value: 'linear-gradient(160deg, #4DABF7 0%, #A5D8FF 100%)' },
+  { label: 'Lilla',    value: 'linear-gradient(160deg, #CC5DE8 0%, #F3D9FA 100%)' },
+  { label: 'Mintgrønn', value: 'linear-gradient(160deg, #38D9A9 0%, #C3FAE8 100%)' },
+  { label: 'Jordbær',  value: 'linear-gradient(160deg, #F03E3E 0%, #FFB8B8 100%)' },
+  { label: 'Natt',     value: 'linear-gradient(160deg, #1E1B2E 0%, #2D2A3E 100%)' },
+  { label: 'Hvit',     value: '#FFFFFF' },
+  { label: 'Kritt',    value: '#2B2D42' },
 ]
+
+const inputStyle: React.CSSProperties = {
+  background: 'var(--panel-bg-alt)',
+  border: '1.5px solid var(--panel-border)',
+  color: 'var(--ink)',
+}
 
 export function Bakgrunn({ widget }: { widget: Widget }) {
   const { setBackground } = useBoardStore()
@@ -36,8 +42,8 @@ export function Bakgrunn({ widget }: { widget: Widget }) {
 
   return (
     <WidgetWrapper widget={widget} minWidth={280} minHeight={300} title="Bakgrunn">
-      <div className="flex flex-col gap-3 h-full bg-black/20 p-3 overflow-y-auto">
-        <p className="text-white/50 text-xs">Velg bakgrunn for tavlen</p>
+      <div className="flex flex-col gap-3 h-full p-3 overflow-y-auto" style={{ color: 'var(--ink)' }}>
+        <p className="text-xs" style={{ color: 'var(--ink-muted)' }}>Velg bakgrunn for tavlen</p>
 
         {/* Preset grid */}
         <div className="grid grid-cols-3 gap-2">
@@ -45,22 +51,30 @@ export function Bakgrunn({ widget }: { widget: Widget }) {
             <button
               key={value}
               onClick={() => setBackground(value)}
-              className="relative rounded-xl overflow-hidden aspect-video border-2 border-transparent hover:border-white/50 transition-all group"
-              style={{ background: value }}
+              className="relative rounded-xl overflow-hidden aspect-video transition-all group"
+              style={{
+                background: value,
+                border: '2.5px solid var(--panel-border)',
+                boxShadow: '2px 2px 0 var(--shadow-color)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#7C3AED' }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--panel-border)' }}
             >
-              <div className="absolute inset-0 bg-black/20 flex items-end justify-center pb-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-white text-[10px] font-semibold">{label}</span>
+              <div
+                className="absolute inset-x-0 bottom-0 flex items-end justify-center pb-1"
+                style={{ background: 'rgba(0,0,0,0.18)' }}
+              >
+                <span className="text-white text-[10px] font-bold drop-shadow">{label}</span>
               </div>
-              <span className="absolute bottom-1 left-0 right-0 text-center text-white/60 text-[10px]">{label}</span>
             </button>
           ))}
         </div>
 
-        <div className="h-px bg-white/10" />
+        <div className="h-px" style={{ background: 'var(--panel-border)' }} />
 
         {/* URL input */}
-        <div>
-          <p className="text-white/40 text-xs mb-1.5">Bakgrunnsbilde fra URL</p>
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs font-bold" style={{ color: 'var(--ink-soft)' }}>Bakgrunnsbilde fra URL</p>
           <div className="flex gap-1.5">
             <input
               type="text"
@@ -68,11 +82,15 @@ export function Bakgrunn({ widget }: { widget: Widget }) {
               onChange={(e) => setUrlInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applyImage(urlInput)}
               placeholder="https://..."
-              className="flex-1 bg-white/10 text-white text-xs rounded-lg px-2 py-1.5 border border-white/10 outline-none focus:border-blue-400 placeholder-white/30"
+              className="flex-1 text-xs rounded-lg px-2 py-1.5 outline-none"
+              style={{ ...inputStyle, fontSize: 11 }}
             />
             <button
               onClick={() => applyImage(urlInput)}
-              className="bg-blue-500/60 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg font-bold transition-colors"
+              style={{ background: '#4D9FFF', color: '#FFFFFF', border: 'none' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#228BE6' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#4D9FFF' }}
             >
               Bruk
             </button>
@@ -80,11 +98,17 @@ export function Bakgrunn({ widget }: { widget: Widget }) {
         </div>
 
         {/* File upload */}
-        <div>
-          <p className="text-white/40 text-xs mb-1.5">Last opp bilde</p>
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs font-bold" style={{ color: 'var(--ink-soft)' }}>Last opp bilde</p>
           <button
             onClick={() => fileRef.current?.click()}
-            className="w-full border-2 border-dashed border-white/20 hover:border-blue-400/50 rounded-xl py-3 text-white/40 hover:text-white/70 text-sm transition-colors"
+            className="w-full rounded-xl py-3 text-sm font-bold transition-colors"
+            style={{
+              border: '2px dashed var(--panel-border)',
+              color: 'var(--ink-muted)',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#7C3AED'; e.currentTarget.style.color = '#7C3AED' }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--panel-border)'; e.currentTarget.style.color = 'var(--ink-muted)' }}
           >
             📁 Velg fil
           </button>
@@ -92,13 +116,14 @@ export function Bakgrunn({ widget }: { widget: Widget }) {
         </div>
 
         {/* Custom color */}
-        <div>
-          <p className="text-white/40 text-xs mb-1.5">Egendefinert farge</p>
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs font-bold" style={{ color: 'var(--ink-soft)' }}>Egendefinert farge</p>
           <input
             type="color"
-            defaultValue="#1a1a2e"
+            defaultValue="#FFF8ED"
             onChange={(e) => setBackground(e.target.value)}
-            className="w-full h-10 rounded-lg cursor-pointer bg-transparent border border-white/10"
+            className="w-full h-10 rounded-lg cursor-pointer"
+            style={{ border: '2px solid var(--panel-border)', background: 'var(--panel-bg-alt)' }}
           />
         </div>
       </div>

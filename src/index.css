@@ -1,102 +1,208 @@
 @import "tailwindcss";
 
+/* ── Design tokens ───────────────────────────────────────────────────────────
+   Inspired by POK BOK (saturated primaries), Funbrain (warm energy),
+   and Excalidraw (paper canvas, offset shadows, hand-drawn warmth)
+   ─────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* ── Light mode (default) ─────────────────────────────────── */
+  --canvas-bg:     #FFF8ED;
+  --dot-color:     #C8B89A;
+
+  /* Panels */
+  --panel-bg:      #FFFFFF;
+  --panel-bg-alt:  #FAF7F4;
+  --panel-border:  #E2D9CC;
+
+  /* Text/ink */
+  --ink:           #2C3E50;
+  --ink-soft:      #5D7078;
+  --ink-muted:     #9DB2BC;
+
+  /* Shadows — solid offset (Excalidraw / POK BOK style) */
+  --shadow-sm:     3px 3px 0 rgba(44,62,80,0.12);
+  --shadow-md:     4px 4px 0 rgba(44,62,80,0.15);
+  --shadow-lg:     6px 6px 0 rgba(44,62,80,0.15);
+  --shadow-xl:     8px 8px 0 rgba(44,62,80,0.18);
+
+  /* Resizable handle fill */
+  --handle-bg:     #FFFFFF;
+
+  /* Brand palette — stays the same in both modes */
+  --kid-yellow:    #FFD43B;
+  --kid-orange:    #FF6B35;
+  --kid-coral:     #FF6B6B;
+  --kid-red:       #F03E3E;
+  --kid-pink:      #F783AC;
+  --kid-purple:    #CC5DE8;
+  --kid-violet:    #7C3AED;
+  --kid-blue:      #339AF0;
+  --kid-sky:       #74C0FC;
+  --kid-teal:      #20C997;
+  --kid-green:     #51CF66;
+  --kid-lime:      #A9E34B;
+}
+
+/* ── Dark mode overrides ──────────────────────────────────────── */
+[data-theme="dark"] {
+  --canvas-bg:     #1E1B2E;
+  --dot-color:     rgba(255,255,255,0.06);
+
+  --panel-bg:      #2D2A3E;
+  --panel-bg-alt:  #252235;
+  --panel-border:  #3E3A52;
+
+  --ink:           #EDE8E0;
+  --ink-soft:      #A9B4C2;
+  --ink-muted:     #5E6B7A;
+
+  --shadow-sm:     3px 3px 0 rgba(0,0,0,0.35);
+  --shadow-md:     4px 4px 0 rgba(0,0,0,0.40);
+  --shadow-lg:     6px 6px 0 rgba(0,0,0,0.40);
+  --shadow-xl:     8px 8px 0 rgba(0,0,0,0.45);
+
+  --handle-bg:     #3E3A52;
+}
+
 @layer base {
   * { box-sizing: border-box; }
+
   body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #1a1a2e;
-    color: white;
+    font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+    background: var(--canvas-bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
   }
+
   #root {
     width: 100vw;
     height: 100vh;
   }
 }
 
-/* React Resizable handles */
+/* ── React Resizable handles — larger, friendlier ───────────────────────────*/
 .react-resizable { position: relative; }
+
 .react-resizable-handle {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  background: rgba(255,255,255,0.8);
+  width: 16px;
+  height: 16px;
+  background: var(--handle-bg);
   border-radius: 50%;
   z-index: 10;
-  border: 2px solid rgba(0,0,0,0.3);
+  border: 2.5px solid var(--kid-violet);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.1s ease;
 }
+
 .widget-container:hover .react-resizable-handle {
   opacity: 1;
 }
-.react-resizable-handle-se { bottom: -7px; right: -7px; cursor: se-resize; }
-.react-resizable-handle-sw { bottom: -7px; left: -7px; cursor: sw-resize; }
-.react-resizable-handle-ne { top: -7px; right: -7px; cursor: ne-resize; }
-.react-resizable-handle-nw { top: -7px; left: -7px; cursor: nw-resize; }
-.react-resizable-handle-n { top: -7px; left: calc(50% - 7px); cursor: n-resize; }
-.react-resizable-handle-s { bottom: -7px; left: calc(50% - 7px); cursor: s-resize; }
-.react-resizable-handle-e { right: -7px; top: calc(50% - 7px); cursor: e-resize; }
-.react-resizable-handle-w { left: -7px; top: calc(50% - 7px); cursor: w-resize; }
 
-/* Animations */
+.react-resizable-handle:hover {
+  transform: scale(1.3);
+}
+
+.react-resizable-handle-se { bottom: -8px; right: -8px; cursor: se-resize; }
+.react-resizable-handle-sw { bottom: -8px; left: -8px; cursor: sw-resize; }
+.react-resizable-handle-ne { top: -8px; right: -8px; cursor: ne-resize; }
+.react-resizable-handle-nw { top: -8px; left: -8px; cursor: nw-resize; }
+.react-resizable-handle-n  { top: -8px; left: calc(50% - 8px); cursor: n-resize; }
+.react-resizable-handle-s  { bottom: -8px; left: calc(50% - 8px); cursor: s-resize; }
+.react-resizable-handle-e  { right: -8px; top: calc(50% - 8px); cursor: e-resize; }
+.react-resizable-handle-w  { left: -8px; top: calc(50% - 8px); cursor: w-resize; }
+
+/* ── Kid-friendly button base ───────────────────────────────────────────────*/
+.kid-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  border-radius: 14px;
+  border: 2.5px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+}
+.kid-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+.kid-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(44,62,80,0.1);
+}
+
+/* ── Kid card ───────────────────────────────────────────────────────────────*/
+.kid-card {
+  background: var(--panel-bg);
+  border: 2.5px solid var(--panel-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Dot-grid canvas texture ────────────────────────────────────────────────*/
+.canvas-grid {
+  background-image: radial-gradient(circle, var(--dot-color) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Animations ─────────────────────────────────────────────────────────────*/
 @keyframes pulse-green {
-  0%, 100% { box-shadow: 0 0 20px #22c55e, 0 0 40px #22c55e; }
-  50% { box-shadow: 0 0 40px #22c55e, 0 0 80px #22c55e; }
+  0%, 100% { box-shadow: 0 0 20px #51CF66, 0 0 40px #51CF66; }
+  50%       { box-shadow: 0 0 40px #51CF66, 0 0 80px #51CF66; }
 }
 @keyframes pulse-yellow {
-  0%, 100% { box-shadow: 0 0 20px #eab308, 0 0 40px #eab308; }
-  50% { box-shadow: 0 0 40px #eab308, 0 0 80px #eab308; }
+  0%, 100% { box-shadow: 0 0 20px #FFD43B, 0 0 40px #FFD43B; }
+  50%       { box-shadow: 0 0 40px #FFD43B, 0 0 80px #FFD43B; }
 }
 @keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 20px #ef4444, 0 0 40px #ef4444; }
-  50% { box-shadow: 0 0 40px #ef4444, 0 0 80px #ef4444; }
+  0%, 100% { box-shadow: 0 0 20px #F03E3E, 0 0 40px #F03E3E; }
+  50%       { box-shadow: 0 0 40px #F03E3E, 0 0 80px #F03E3E; }
 }
 @keyframes dice-shake {
   0%, 100% { transform: rotate(0deg) scale(1); }
-  20% { transform: rotate(-20deg) scale(1.15); }
-  40% { transform: rotate(20deg) scale(1.2); }
-  60% { transform: rotate(-15deg) scale(1.15); }
-  80% { transform: rotate(10deg) scale(1.1); }
+  20%       { transform: rotate(-20deg) scale(1.15); }
+  40%       { transform: rotate(20deg) scale(1.2); }
+  60%       { transform: rotate(-15deg) scale(1.15); }
+  80%       { transform: rotate(10deg) scale(1.1); }
 }
 @keyframes timer-done {
-  0%, 100% { background: rgba(239,68,68,0.2); }
-  50% { background: rgba(239,68,68,0.6); }
+  0%, 100% { background: rgba(240,62,62,0.15); }
+  50%       { background: rgba(240,62,62,0.5); }
 }
 @keyframes float-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes bounce-in {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.12); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(-4deg); }
+  75%       { transform: rotate(4deg); }
 }
 @keyframes confetti-fall {
-  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
   100% { transform: translateY(120px) rotate(720deg); opacity: 0; }
 }
 @keyframes wheel-pointer-bounce {
   0%, 100% { transform: translateX(-50%) rotate(0deg); }
-  50% { transform: translateX(-50%) rotate(-10deg); }
+  50%       { transform: translateX(-50%) rotate(-10deg); }
 }
 @keyframes spin-in {
   from { transform: scale(0) rotate(-180deg); opacity: 0; }
-  to { transform: scale(1) rotate(0deg); opacity: 1; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
 }
-@keyframes bounce-in {
-  0% { transform: scale(0.3); opacity: 0; }
-  50% { transform: scale(1.1); }
-  70% { transform: scale(0.95); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.animate-pulse-green { animation: pulse-green 1.5s ease-in-out infinite; }
-.animate-pulse-yellow { animation: pulse-yellow 1.5s ease-in-out infinite; }
-.animate-pulse-red { animation: pulse-red 1.5s ease-in-out infinite; }
-.animate-dice-shake { animation: dice-shake 0.6s ease-in-out; }
-.animate-timer-done { animation: timer-done 0.5s ease-in-out infinite; }
-.animate-float-in { animation: float-in 0.2s ease-out forwards; }
-.animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards; }
-
-/* ── Canvas switch slide ────────────────────────────────────────── */
 @keyframes canvas-slide-in-right {
   from { opacity: 0; transform: translateX(40px); }
   to   { opacity: 1; transform: translateX(0); }
@@ -105,5 +211,20 @@
   from { opacity: 0; transform: translateX(-40px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+@keyframes pop-in {
+  0%   { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+  70%  { transform: scale(1.08) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.animate-pulse-green    { animation: pulse-green 1.5s ease-in-out infinite; }
+.animate-pulse-yellow   { animation: pulse-yellow 1.5s ease-in-out infinite; }
+.animate-pulse-red      { animation: pulse-red 1.5s ease-in-out infinite; }
+.animate-dice-shake     { animation: dice-shake 0.6s ease-in-out; }
+.animate-timer-done     { animation: timer-done 0.5s ease-in-out infinite; }
+.animate-float-in       { animation: float-in 0.22s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.animate-bounce-in      { animation: bounce-in 0.45s cubic-bezier(0.36,0.07,0.19,0.97) forwards; }
+.animate-wiggle         { animation: wiggle 0.4s ease-in-out; }
+.animate-pop-in         { animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards; }
 .animate-canvas-in-right { animation: canvas-slide-in-right 0.25s ease-out forwards; }
 .animate-canvas-in-left  { animation: canvas-slide-in-left  0.25s ease-out forwards; }

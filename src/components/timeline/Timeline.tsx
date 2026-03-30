@@ -129,9 +129,9 @@ export function Timeline() {
         className="fixed top-0 left-0 right-0 z-[9998] flex flex-col select-none"
         style={{
           height: TIMELINE_BAR_HEIGHT,
-          background: 'rgba(8,8,20,0.94)',
-          backdropFilter: 'blur(16px)',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          background: 'var(--panel-bg)',
+          borderBottom: '2.5px solid var(--panel-border)',
+          boxShadow: '0 3px 0 rgba(44,62,80,0.08)',
         }}
       >
         {/* Scrollable content */}
@@ -149,8 +149,8 @@ export function Timeline() {
             {/* ── Ruler — very top ───────────────────────────────────────── */}
             <div className="absolute top-0 left-0 right-0" style={{ height: RULER_H }}>
               {ticks.map((m) => {
-                const x       = (m - startMin) * pxPerMin
-                const isHour  = m % 60 === 0
+                const x      = (m - startMin) * pxPerMin
+                const isHour = m % 60 === 0
                 return (
                   <div
                     key={m}
@@ -158,13 +158,23 @@ export function Timeline() {
                     style={{ left: x, transform: 'translateX(-50%)' }}
                   >
                     <div
-                      className="bg-white/20"
-                      style={{ width: 1, height: isHour ? 9 : 5, marginTop: isHour ? 0 : 4 }}
+                      style={{
+                        width: 1,
+                        height: isHour ? 9 : 5,
+                        marginTop: isHour ? 0 : 4,
+                        background: isHour ? '#9DB2BC' : '#C8B89A',
+                      }}
                     />
                     {(isHour || pxPerMin >= 4) && (
                       <span
-                        className="text-white/40 font-mono"
-                        style={{ fontSize: 9, marginTop: 1, whiteSpace: 'nowrap' }}
+                        style={{
+                          fontSize: 8,
+                          marginTop: 1,
+                          whiteSpace: 'nowrap',
+                          color: '#9DB2BC',
+                          fontFamily: 'Nunito, sans-serif',
+                          fontWeight: 700,
+                        }}
                       >
                         {minutesToTime(m)}
                       </span>
@@ -186,15 +196,20 @@ export function Timeline() {
                   style={{
                     left: x,
                     width: w,
-                    background: TYPE_COLOR[entry.type] + '38',
-                    borderLeft: `2px solid ${TYPE_COLOR[entry.type]}`,
+                    background: TYPE_COLOR[entry.type] + '28',
+                    borderLeft: `2.5px solid ${TYPE_COLOR[entry.type]}`,
                   }}
                   title={`${entry.time} — ${entry.label}`}
                 >
                   {w > 28 && (
                     <span
-                      className="pl-1 truncate font-medium leading-none"
-                      style={{ fontSize: 9, color: TYPE_COLOR[entry.type] }}
+                      className="pl-1 truncate leading-none"
+                      style={{
+                        fontSize: 9,
+                        color: TYPE_COLOR[entry.type],
+                        fontFamily: 'Nunito, sans-serif',
+                        fontWeight: 800,
+                      }}
                     >
                       {w > 52 ? entry.label : entry.time}
                     </span>
@@ -209,25 +224,25 @@ export function Timeline() {
                 className="absolute top-0 z-20 flex flex-col items-center pointer-events-none"
                 style={{ left: markerX, height: TIMELINE_BAR_HEIGHT }}
               >
-                {/* Tick at very top */}
+                {/* Triangle at top */}
                 <div style={{
                   width: 0, height: 0,
                   borderLeft: '3px solid transparent',
                   borderRight: '3px solid transparent',
-                  borderTop: '4px solid #f43f5e',
+                  borderTop: '5px solid #F03E3E',
                 }} />
                 {/* Line */}
-                <div className="flex-1 w-px" style={{ background: '#f43f5e', opacity: 0.9 }} />
-                {/* Time badge at bottom edge */}
+                <div className="flex-1" style={{ width: 1.5, background: '#F03E3E', opacity: 0.85 }} />
+                {/* Time badge at bottom */}
                 <div
-                  className="rounded-sm px-1 text-white font-mono font-bold leading-none"
+                  className="font-mono font-black leading-none rounded"
                   style={{
-                    fontSize: 9,
-                    background: '#f43f5e',
+                    fontSize: 8,
+                    background: '#F03E3E',
+                    color: '#FFFFFF',
                     whiteSpace: 'nowrap',
                     transform: 'translateX(-50%)',
-                    paddingTop: 1,
-                    paddingBottom: 1,
+                    padding: '1px 3px',
                   }}
                 >
                   {nowTime}
