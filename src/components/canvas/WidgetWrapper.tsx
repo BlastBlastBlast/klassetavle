@@ -1,8 +1,13 @@
-import React, { useRef, useCallback } from 'react'
+import React, { useRef, useCallback, useEffect, useState } from 'react'
 import { ResizableBox } from 'react-resizable'
 import { X, GripHorizontal } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import type { Widget } from '../../store/boardStore'
+
+// Approximate layout constants so widgets don't spawn under chrome
+const DOCK_W    = 88  // toolbar width (open)
+const TIMELINE_H = 48  // timeline bar + gap
+const NAV_H     = 72  // canvas navigator pill + margin
 
 interface Props {
   widget: Widget
@@ -23,7 +28,35 @@ export function WidgetWrapper({
 }: Props) {
   const { updateWidget, removeWidget, bringToFront } = useBoardStore()
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const posRef     = useRef({ x: widget.x, y: widget.y })
+
+  // Track viewport size reactively so clamps stay correct after resize
+  const [vw, setVw] = useState(() => window.innerWidth)
+  const [vh, setVh] = useState(() => window.innerHeight)
+  useEffect(() => {
+    const onResize = () => { setVw(window.innerWidth); setVh(window.innerHeight) }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  // Clamp the stored position + size to what's actually visible
+  const maxW = Math.max(minWidth,  vw - DOCK_W - 8)
+  const maxH = Math.max(minHeight, vh - TIMELINE_H - NAV_H - 8)
+
+  const clampedW = Math.min(widget.width,  maxW)
+  const clampedH = Math.min(widget.height, maxH)
+  const clampedX = Math.max(DOCK_W, Math.min(widget.x, vw - clampedW - 4))
+  const clampedY = Math.max(TIMELINE_H + 4, Math.min(widget.y, vh - clampedH - NAV_H - 4))
+
+  const posRef = useRef({ x: clampedX, y: clampedY })
+
+  // Keep posRef in sync when clamping changes (e.g. on resize or store update)
+  useEffect(() => {
+    posRef.current = { x: clampedX, y: clampedY }
+    if (wrapperRef.current) {
+      wrapperRef.current.style.left = clampedX + 'px'
+      wrapperRef.current.style.top  = clampedY + 'px'
+    }
+  }, [clampedX, clampedY])
 
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return
@@ -60,14 +93,14 @@ export function WidgetWrapper({
   return (
     <div
       ref={wrapperRef}
-      style={{ position: 'absolute', left: widget.x, top: widget.y, zIndex: widget.zIndex }}
+      style={{ position: 'absolute', left: clampedX, top: clampedY, zIndex: widget.zIndex }}
       className="animate-float-in widget-container"
     >
       <ResizableBox
-        width={widget.width}
-        height={widget.height}
+        width={clampedW}
+        height={clampedH}
         minConstraints={[minWidth, minHeight]}
-        maxConstraints={[1800, 1000]}
+        maxConstraints={[maxW, maxH]}
         resizeHandles={['se', 'sw', 'ne', 'nw', 'n', 's', 'e', 'w']}
         onResizeStop={(_e, data) =>
           updateWidget(widget.id, { width: data.size.width, height: data.size.height })

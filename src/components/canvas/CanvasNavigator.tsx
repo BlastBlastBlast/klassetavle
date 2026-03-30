@@ -50,6 +50,8 @@ export function CanvasNavigator() {
         background: 'var(--panel-bg)',
         border: '2.5px solid var(--panel-border)',
         boxShadow: 'var(--shadow-md)',
+        maxWidth: 'calc(100vw - 1rem)',
+        overflow: 'hidden',
       }}
     >
       {/* ← Prev */}

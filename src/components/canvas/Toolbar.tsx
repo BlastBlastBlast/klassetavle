@@ -33,6 +33,16 @@ export function Toolbar() {
   const [showConfirmClear, setShowConfirmClear] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
 
+  // Auto-collapse on small screens
+  useEffect(() => {
+    const check = () => {
+      if (window.innerWidth < 640) setCollapsed(true)
+    }
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   useEffect(() => {
     const t = setTimeout(() => {
       setJustSaved(true)
@@ -47,13 +57,22 @@ export function Toolbar() {
       className="fixed left-0 top-0 h-full z-[9999] flex items-center"
       style={{ pointerEvents: 'none' }}
     >
-      <div className="relative flex flex-col items-center" style={{ pointerEvents: 'auto' }}>
+      {/*
+       * This wrapper translates as ONE UNIT — panel + toggle tab move together.
+       * When collapsed: -translate-x-full shifts everything left by the panel's
+       * width, leaving only the tab button (positioned right: -26 outside the
+       * wrapper's right edge) peeking in from the screen's left edge.
+       */}
+      <div
+        className={`relative transition-all duration-300 ${
+          collapsed ? '-translate-x-full' : 'translate-x-0'
+        }`}
+        style={{ pointerEvents: 'auto' }}
+      >
 
         {/* ── Main panel ──────────────────────────────────────────────────── */}
         <div
-          className={`flex flex-col gap-1.5 py-3 px-2 transition-all duration-300 ${
-            collapsed ? 'translate-x-[-110%] opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'
-          }`}
+          className="flex flex-col gap-1.5 py-3 px-2"
           style={{
             background: 'var(--panel-bg)',
             border: '2.5px solid var(--panel-border)',
@@ -61,6 +80,10 @@ export function Toolbar() {
             borderRadius: '0 20px 20px 0',
             boxShadow: 'var(--shadow-md)',
             minWidth: '72px',
+            // Never taller than the viewport — scroll internally if needed
+            maxHeight: 'calc(100vh - 1rem)',
+            overflowY: 'auto',
+            overflowX: 'hidden',
           }}
         >
           {/* Logo label */}
@@ -181,7 +204,11 @@ export function Toolbar() {
           </div>
         </div>
 
-        {/* ── Collapse tab ────────────────────────────────────────────────── */}
+        {/* ── Collapse tab ─────────────────────────────────────────────────────
+         *  Positioned right: -26 on the WRAPPER (not the panel alone), so it
+         *  translates with the wrapper. When collapsed the tab remains visible
+         *  as a small handle peeking out from the left edge of the screen.
+         * ──────────────────────────────────────────────────────────────────── */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="absolute flex items-center justify-center transition-all"

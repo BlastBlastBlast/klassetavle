@@ -129,10 +129,25 @@ export const useBoardStore = create<BoardState>()(
         const size = DEFAULT_SIZES[type]
         const id = `${type}-${Date.now()}`
         const offset = (widgets.length % 8) * 20
+
+        // Viewport-aware spawn: keep widgets fully inside visible area
+        const DOCK_W    = 92  // toolbar width
+        const TIMELINE_H = 52 // timeline + gap
+        const NAV_H     = 72  // canvas navigator + margin
+        const vw = typeof window !== 'undefined' ? window.innerWidth  : 1200
+        const vh = typeof window !== 'undefined' ? window.innerHeight : 800
+        const availW = vw - DOCK_W - 8
+        const availH = vh - TIMELINE_H - NAV_H - 8
+
+        const w = Math.min(size.width,  availW)
+        const h = Math.min(size.height, availH)
+        const x = Math.min(DOCK_W + 8 + offset, vw - w - 4)
+        const y = Math.min(TIMELINE_H + 8 + offset, vh - h - NAV_H - 4)
+
         const newWidget: Widget = {
           id, type,
-          x: 100 + offset, y: 100 + offset,
-          width: size.width, height: size.height,
+          x, y,
+          width: w, height: h,
           zIndex: maxZ + 1,
           data: {},
           ...defaults,
