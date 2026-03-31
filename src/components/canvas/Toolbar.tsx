@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Trash2, ChevronLeft, ChevronRight, Sun, Moon } from 'lucide-react'
 import { useBoardStore } from '../../store/boardStore'
 import { useThemeStore } from '../../store/themeStore'
